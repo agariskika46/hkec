@@ -12,6 +12,9 @@ COPY . /var/www/html
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
 
+# Copy nginx configs
+RUN cp docker/nginx/site.conf /etc/nginx/sites-enabled/default/
+
 RUN composer install
 
 RUN yarn install

@@ -16,7 +16,7 @@ jobs:
       script: 
       - travis_retry composer self-update
       - travis_retry composer install --prefer-source --no-interaction
-      - vendor/bin/phpunit tests/Unit/ExampleTest.php
+      - vendor/bin/phpunit tests/Feature/ExampleTest.php
     - stage: "Build Docker Image"
       name: "Build and Push Images Docker" 
       script:

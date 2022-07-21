@@ -1,26 +1,35 @@
-FROM richarvey/nginx-php-fpm
+FROM php:7.4.1-apache
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# use root user
+USER root 
 
-RUN set -ex \
-    	&& apk --no-cache add postgresql-dev nodejs yarn npm\
-    	&& docker-php-ext-install pdo pdo_pgsql
-
+# Set working directory to the apache public directory 
 WORKDIR /var/www/html
 
-COPY . /var/www/html
+# Copy all files into the apache public directory
+COPY . /var/www/html/
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
+# Install the dependecies to run php
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    zlib1g-dev \
+    libxml2-dev \
+    libzip-dev \ 
+    zip \
+    curl \
+    unzip \
+    && docker-php-ext-configure gd \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install pdo_mysql \
+    && docker-php-ext-install mysqli \
+    && docker-php-ext-install zip \
+    && docker-php-source delete
 
-# Copy nginx configs
-RUN cp docker/nginx/site.conf /etc/nginx/sites-enabled/default/
 
-RUN composer install
+COPY ./vhost.conf /etc/apache2/sites-available/000-default.conf
 
-RUN yarn install
+# Download php composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-COPY .env.example .env
-
-RUN php artisan key:generate
-
-EXPOSE 80
+RUN chown -R www-data:www-data /var/www/html \
+    && a2enmod rewrite

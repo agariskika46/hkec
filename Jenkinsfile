@@ -2,12 +2,6 @@ pipeline {
     agent any
     stages {
         stage("Build") {
-            environment {
-                DB_HOST = credentials("127.0.0.1")
-                DB_DATABASE = credentials("hkendurances")
-                DB_USERNAME = credentials("root")
-                DB_PASSWORD = credentials("")
-            }
             steps {
                 sh 'php --version'
                 sh 'composer install'
